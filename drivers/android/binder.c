@@ -1696,7 +1696,9 @@ static void binder_free_transaction(struct binder_transaction *t)
 	trace_android_vh_free_oem_binder_struct(t);
 	if (target_proc) {
 		binder_inner_proc_lock(target_proc);
-		target_proc->outstanding_txns--;
+		if (!(t->flags & TF_ONE_WAY)) {
+			target_proc->outstanding_txns--;
+		}
 		if (target_proc->outstanding_txns < 0)
 			pr_warn("%s: Unexpected outstanding_txns %d\n",
 				__func__, target_proc->outstanding_txns);
@@ -2975,7 +2977,9 @@ static int binder_proc_transaction(struct binder_transaction *t,
 					     "txn %d supersedes %d\n",
 					     t->debug_id, t_outdated->debug_id);
 				list_del_init(&t_outdated->work.entry);
-				proc->outstanding_txns--;
+				if (!(t_outdated->flags & TF_ONE_WAY)) {
+					proc->outstanding_txns--;
+				}
 			}
 		}
 		trace_android_vh_binder_special_task(t, proc, thread,
@@ -2992,7 +2996,9 @@ static int binder_proc_transaction(struct binder_transaction *t,
 	if (!pending_async)
 		binder_wakeup_thread_ilocked(proc, thread, !oneway /* sync */);
 
-	proc->outstanding_txns++;
+	if (!(t->flags & TF_ONE_WAY)) {
+		proc->outstanding_txns++;
+	}
 	binder_inner_proc_unlock(proc);
 	binder_node_unlock(node);
 
@@ -3759,7 +3765,10 @@ static void binder_transaction(struct binder_proc *proc,
 		BUG_ON(t->buffer->async_transaction != 0);
 		binder_pop_transaction_ilocked(target_thread, in_reply_to);
 		binder_enqueue_thread_work_ilocked(target_thread, &t->work);
-		target_proc->outstanding_txns++;
+
+		if (!(t->flags & TF_ONE_WAY)) {
+			target_proc->outstanding_txns++;
+		}
 		binder_inner_proc_unlock(target_proc);
 		wake_up_interruptible_sync(&target_thread->wait);
 		trace_android_vh_binder_restore_priority(in_reply_to, current);
@@ -5365,7 +5374,9 @@ static int binder_thread_release(struct binder_proc *proc,
 			     (t->to_thread == thread) ? "in" : "out");
 
 		if (t->to_thread == thread) {
-			thread->proc->outstanding_txns--;
+			if (!(t->flags & TF_ONE_WAY)) {
+				thread->proc->outstanding_txns--;
+			}
 			t->to_proc = NULL;
 			t->to_thread = NULL;
 			if (t->buffer) {
