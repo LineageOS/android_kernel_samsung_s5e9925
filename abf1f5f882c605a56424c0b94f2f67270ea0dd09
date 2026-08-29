@@ -16,6 +16,23 @@
       "message": "Can you check if RNDIS USB tethering is fixed using this patch?",
       "revId": "abf1f5f882c605a56424c0b94f2f67270ea0dd09",
       "serverId": "1ec6b3db-b2c1-4fa4-84a2-4c7efe89ba71"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "af8b5dad_5e8bc1cf",
+        "filename": "/PATCHSET_LEVEL",
+        "patchSetId": 1
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 35850
+      },
+      "writtenOn": "2026-08-29T15:24:07Z",
+      "side": 1,
+      "message": "@anubhabkundu2@gmail.com I am a bit confused, RNDIS already works for us.",
+      "revId": "abf1f5f882c605a56424c0b94f2f67270ea0dd09",
+      "serverId": "1ec6b3db-b2c1-4fa4-84a2-4c7efe89ba71"
     }
   ]
 }
